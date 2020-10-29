@@ -8,6 +8,7 @@ import org.junit.Test;
 import com.blz.employeepayrollsql.controller.Emp_Payroll_JDBC_Main;
 import com.blz.employeepayrollsql.controller.Emp_Payroll_JDBC_Main.IOService;
 import com.blz.employeepayrollsql.model.Contact;
+import com.blz.employeepayrollsql.model.CustomPayrollException;
 
 import junit.framework.Assert;
 
@@ -18,8 +19,12 @@ public class Emp_Payroll_JDBC_Test {
 	@Test
 	public void givenEmployeePayrollServiceInDB_ShouldMatchEmployeeCount() {
 		Emp_Payroll_JDBC_Main empPayrollService=new Emp_Payroll_JDBC_Main();
-		List<Contact> empPayrollData=empPayrollService.readEmployeePayrollDatabase(IOService.DB_IO);
-		Assert.assertEquals(3, empPayrollData.size());
-		
+		List<Contact> empPayrollData;
+		try {
+			empPayrollData = empPayrollService.readEmployeePayrollDatabase(IOService.DB_IO);
+			Assert.assertEquals(3, empPayrollData.size());
+		} catch (CustomPayrollException e) {
+			e.printStackTrace();
+		}
 	}
 }

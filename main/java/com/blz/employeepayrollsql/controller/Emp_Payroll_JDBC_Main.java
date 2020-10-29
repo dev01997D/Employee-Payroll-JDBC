@@ -3,16 +3,10 @@
  */
 package com.blz.employeepayrollsql.controller;
 
-import java.sql.Connection;
-import java.sql.Driver;
-import java.sql.DriverManager;
-import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.Enumeration;
 import java.util.List;
-import java.util.Scanner;
-
 import com.blz.employeepayrollsql.model.Contact;
+import com.blz.employeepayrollsql.model.CustomPayrollException;
 import com.blz.employeepayrollsql.model.empPayrollDBService;
 
 public class Emp_Payroll_JDBC_Main {
@@ -20,17 +14,8 @@ public class Emp_Payroll_JDBC_Main {
 		CONSOLE_IO, FILE_IO, DB_IO, REST_IO;
 	}
 
-
-	private static void listDrivers() {
-		Enumeration<Driver> driverList = DriverManager.getDrivers();
-		while (driverList.hasMoreElements()) {
-			Driver driverClass = driverList.nextElement();
-			System.out.println(" " + driverClass.getClass().getName());
-		}
-	}
-
 	private List<Contact> employeePayrollList;
-	
+
 	public Emp_Payroll_JDBC_Main() {
 
 	}
@@ -44,12 +29,10 @@ public class Emp_Payroll_JDBC_Main {
 		ArrayList<Contact> employeePayrollList = new ArrayList<Contact>();
 	}
 
-	public List<Contact> readEmployeePayrollDatabase(IOService ioService) {
+	public List<Contact> readEmployeePayrollDatabase(IOService ioService) throws CustomPayrollException {
 		if (ioService.equals(IOService.DB_IO)) {
-			this.employeePayrollList=empPayrollDBService.readData();
+			this.employeePayrollList = empPayrollDBService.readData();
 		}
-		
 		return this.employeePayrollList;
 	}
-
 }
