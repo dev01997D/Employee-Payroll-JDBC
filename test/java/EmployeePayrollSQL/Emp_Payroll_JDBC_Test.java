@@ -36,7 +36,7 @@ public class Emp_Payroll_JDBC_Test {
 	}
 
 	@Test
-	public void givenNewSalaryForEmployee_WhenUpdated_ShouldSyncWithDB() {
+	public void givenNewSalaryForEmployee_WhenUpdatedByPreapredStmt_ShouldSyncWithDB() {
 		try {
 			empPayrollService.readEmployeePayrollDatabase(IOService.DB_IO);
 			empPayrollService.updateEmployeeSalaryInDBThenInList("Terisa", 3000000.00);
