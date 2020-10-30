@@ -3,6 +3,7 @@
  */
 package EmployeePayrollSQL;
 
+import org.junit.Before;
 import org.junit.Test;
 
 import com.blz.employeepayrollsql.controller.Emp_Payroll_JDBC_Main;
@@ -16,14 +17,32 @@ import java.util.List;
 
 @SuppressWarnings("deprecation")
 public class Emp_Payroll_JDBC_Test {
+	Emp_Payroll_JDBC_Main empPayrollService = null;
+
+	@Before
+	public void setup() {
+		empPayrollService = new Emp_Payroll_JDBC_Main();
+	}
+
 	@Test
 	public void givenEmployeePayrollServiceInDB_ShouldMatchEmployeeCount() {
-		Emp_Payroll_JDBC_Main empPayrollService=new Emp_Payroll_JDBC_Main();
 		List<Contact> empPayrollData;
 		try {
 			empPayrollData = empPayrollService.readEmployeePayrollDatabase(IOService.DB_IO);
 			Assert.assertEquals(3, empPayrollData.size());
 		} catch (CustomPayrollException e) {
+			e.printStackTrace();
+		}
+	}
+
+	@Test
+	public void givenNewSalaryForEmployee_WhenUpdated_ShouldSyncWithDB() {
+		try {
+			empPayrollService.readEmployeePayrollDatabase(IOService.DB_IO);
+			empPayrollService.updateEmployeeSalaryInDBThenInList("Terisa", 3000000.00);
+			boolean result = empPayrollService.checkEmployeePayrollListSyncWithDB("Terisa");
+			Assert.assertTrue(result);
+		} catch (Exception e) {
 			e.printStackTrace();
 		}
 	}
