@@ -9,14 +9,14 @@ public class Contact {
 	public String name;
 	public LocalDate startDate;
 
-	// connstructor
+	// Constructor
 	public Contact(int id, double salary, String name) {
 		this.id = id;
 		this.salary = salary;
 		this.name = name;
 	}
 
-	//	 connstructor
+	//	 Constructor
 	public Contact(int id, double salary, String name, LocalDate startDate) {
 		this(id, salary, name);
 		this.startDate = startDate;

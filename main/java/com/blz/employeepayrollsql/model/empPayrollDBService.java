@@ -20,7 +20,7 @@ public class EmpPayrollDBService {
 		return employeePayrollDBServiceObj;
 	}
 
-	//Loading Driver and getting connection object
+	// Loading Driver and getting connection object
 	private static Connection getConnection() throws CustomPayrollException {
 		String jdbcURL = "jdbc:mysql://localhost:3306/payroll_service";
 		String userName = "root";
@@ -41,7 +41,7 @@ public class EmpPayrollDBService {
 		return con;
 	}
 
-	//Reading all the employees data from the DB
+	// Reading all the employees data from the DB
 	public List<Contact> readData() throws CustomPayrollException {
 		String sql = "SELECT * FROM employee_payroll";
 		List<Contact> empPayrollList = new ArrayList<>();
@@ -56,26 +56,26 @@ public class EmpPayrollDBService {
 		return empPayrollList;
 	}
 
-	//Updating employee data into database
+	// Updating employee data into database
 	public int updateEmployeeData(String name, double salary) throws CustomPayrollException {
-		return this.updateEmployeeDataUsingStatement(name, salary);
+		return this.updateEmployeeDataUsingPreparedStatement(name, salary);
 	}
 
-	//Updating salary for given employee using simple statement
-	private int updateEmployeeDataUsingStatement(String name, double salary) throws CustomPayrollException {
-		String sql = String.format("UPDATE employee_payroll set salary = %.2f where name = '%s';", salary, name);
+	// Updating salary for given employee using Prepared statement
+	private int updateEmployeeDataUsingPreparedStatement(String name, double salary) throws CustomPayrollException {
+		String sql = "UPDATE employee_payroll set salary =? where name =?";
 		int noOfRowsAffected = 0;
-		try (Connection con = getConnection();) {
-			Statement stmt = con.createStatement();
-			noOfRowsAffected = stmt.executeUpdate(sql);
+		try (Connection con = getConnection(); PreparedStatement preparedStatement = con.prepareStatement(sql);) {
+			preparedStatement.setDouble(1, salary);
+			preparedStatement.setString(2, name);
+			noOfRowsAffected = preparedStatement.executeUpdate();
 		} catch (SQLException e) {
 			throw new CustomPayrollException("Unable to fetch data from Database!!");
 		}
-		System.out.println(noOfRowsAffected);
 		return noOfRowsAffected;
 	}
 
-	//Method to get ResultSet of query performed and storing into memory as list
+	// Method to get ResultSet of query performed and storing into memory as list
 	private List<Contact> getEmployeePayrollData(ResultSet resultSet) {
 		List<Contact> employeePayrollList = new ArrayList<>();
 		try {
@@ -92,9 +92,10 @@ public class EmpPayrollDBService {
 		return employeePayrollList;
 	}
 
-	//Getting employee data with given name for comparision with DB and list
+	// Getting employee data with given name for comparison with DB and list
 	public List<Contact> getEmployeePayrolldata(String name) throws CustomPayrollException {
 		List<Contact> employeePayrollList = null;
+		// System.out.println(preparedStmt == null);
 		if (preparedStmt == null)
 			preparedStatementForEmployeeData();
 		try {
@@ -108,9 +109,9 @@ public class EmpPayrollDBService {
 		return employeePayrollList;
 	}
 
-	//Use of prepared statement to get employee data from DB
+	// Use of prepared statement to get employee data from DB
 	private void preparedStatementForEmployeeData() throws CustomPayrollException {
-		try  {
+		try {
 			Connection con = getConnection();
 			String sql = "SELECT * FROM employee_payroll WHERE name=?";
 			preparedStmt = con.prepareStatement(sql);

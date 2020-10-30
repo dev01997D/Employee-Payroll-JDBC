@@ -16,7 +16,7 @@ public class Emp_Payroll_JDBC_Main {
 	private List<Contact> employeePayrollList;
 	private static EmpPayrollDBService employeePayrollDBServicebj;
 
-	//Creating Singleton object of EmpPayrollDBService
+	// Creating Singleton object of EmpPayrollDBService
 	public Emp_Payroll_JDBC_Main() {
 		employeePayrollDBServicebj = EmpPayrollDBService.getInstance();
 	}
@@ -34,7 +34,8 @@ public class Emp_Payroll_JDBC_Main {
 		return this.employeePayrollList;
 	}
 
-	// updating salary for employee if salary got modified in database
+	// updating salary for employee if salary got modified in database then in
+	// memory
 	public void updateEmployeeSalaryInDBThenInList(String name, double salary) throws CustomPayrollException {
 		int result = employeePayrollDBServicebj.updateEmployeeData(name, salary);
 		if (result == 0) {
@@ -43,7 +44,6 @@ public class Emp_Payroll_JDBC_Main {
 		Contact contact = this.getEmployeePayrollData(name);
 		if (contact != null)
 			contact.salary = salary;
-		System.out.println(contact.salary);
 	}
 
 	// Filter the employee with given name from the employee list
