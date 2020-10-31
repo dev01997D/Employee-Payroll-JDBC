@@ -81,6 +81,6 @@ public class Emp_Payroll_JDBC_Main {
 	}
 
 	public void addEmployeeToEmployeePayrollDB(String name, String gender, double salary, LocalDate start) throws CustomPayrollException {
-		employeePayrollList.add(employeePayrollDBServicebj.addEmployeeToDB(name, gender, salary, start));
+		employeePayrollList.add(employeePayrollDBServicebj.addEmployeeToDBUC8(name, gender, salary, start));
 	}
 }
