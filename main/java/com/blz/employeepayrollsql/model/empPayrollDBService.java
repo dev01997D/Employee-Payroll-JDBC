@@ -110,6 +110,25 @@ public class EmpPayrollDBService {
 		return noOfRowsAffected;
 	}
 
+	public Contact addEmployeeToDB(String name, String gender, double salary, LocalDate startDate)
+			throws CustomPayrollException {
+		String sql = String.format("INSERT INTO employee_payroll (name, Gender, Salary, start) VALUES ('%s', '%s','%s','%s')",
+				                                                 name, gender, salary,  Date.valueOf(startDate));
+		int rowsAffected, employeeId = -1;
+		try (Connection con = getConnection();) {
+			Statement stmt = con.createStatement();
+			rowsAffected = stmt.executeUpdate(sql, Statement.RETURN_GENERATED_KEYS);
+			if(rowsAffected!=0) {
+				ResultSet resultSet=stmt.getGeneratedKeys();
+				if(resultSet.next())
+					employeeId = resultSet.getInt(1);
+			}		
+		} catch (SQLException e) {
+			throw new CustomPayrollException("Error!! Unable to insert employee to Database");
+		}
+		return new Contact(employeeId, salary, name, startDate);
+	}
+
 	// Getting employee data with given name for comparison with DB and memory using
 	// prepared statement
 	public List<Contact> getEmployeePayrolldata(String name) throws CustomPayrollException {

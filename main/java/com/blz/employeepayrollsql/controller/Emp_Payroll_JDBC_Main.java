@@ -79,4 +79,8 @@ public class Emp_Payroll_JDBC_Main {
 		List<Contact> empPayrollDataList = employeePayrollDBServicebj.getEmployeePayrolldata(name);
 		return empPayrollDataList.get(0).equals(getEmployeePayrollData(name));
 	}
+
+	public void addEmployeeToEmployeePayrollDB(String name, String gender, double salary, LocalDate start) throws CustomPayrollException {
+		employeePayrollList.add(employeePayrollDBServicebj.addEmployeeToDB(name, gender, salary, start));
+	}
 }
