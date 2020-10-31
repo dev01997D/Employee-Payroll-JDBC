@@ -76,4 +76,12 @@ public class Emp_Payroll_JDBC_Test {
 		Assert.assertTrue(
 				maxSalaryByGender.get("M").equals(3000000.00) && maxSalaryByGender.get("F").equals(3000000.00));
 	}
+
+	@Test
+	public void givenNewEmployee_whenAdded_shouldSyncWithDB() throws CustomPayrollException {
+		empPayrollService.readEmployeePayrollDatabase(IOService.DB_IO);
+		empPayrollService.addEmployeeToEmployeePayrollDB("Mark", "M", 5000000.00, LocalDate.now());
+		boolean result = empPayrollService.checkEmployeePayrollListSyncWithDB("Mark");
+		Assert.assertTrue(result);
+	}
 }
