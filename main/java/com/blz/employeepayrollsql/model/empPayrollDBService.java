@@ -9,7 +9,9 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class EmpPayrollDBService {
 	private static EmpPayrollDBService employeePayrollDBServiceObj;
@@ -55,21 +57,35 @@ public class EmpPayrollDBService {
 		return this.executeSQLAndReturnEmployeeList(sql);
 	}
 
-	// Method to get ResultSet of query performed and storing into memory as list
-	private List<Contact> getEmployeePayrollData(ResultSet resultSet) {
-		List<Contact> employeePayrollList = new ArrayList<>();
-		try {
+	// Get average salary of employee group by gender
+	public Map<String, Double> getAverageSalaryByGender() throws CustomPayrollException {
+		String sql = "SELECT Gender, Avg(salary) from employee_payroll group by Gender;";
+		String operation = "Avg(Salary)";
+		return this.executeSQLAndReturnMap(sql, operation);
+	}
+
+	// Get average salary of employee group by gender
+	public Map<String, Double> getMaxSalaryByGender() throws CustomPayrollException {
+		String sql = "SELECT Gender, Max(salary) from employee_payroll group by Gender;";
+		String operation = "Max(Salary)";
+		return this.executeSQLAndReturnMap(sql, operation);
+	}
+
+	// Execute SQL and return required map
+	public Map<String, Double> executeSQLAndReturnMap(String sql, String operation) throws CustomPayrollException {
+		Map<String, Double> employeePayrollMap = new HashMap<>();
+		try (Connection con = getConnection()) {
+			Statement stmt = con.createStatement();
+			ResultSet resultSet = stmt.executeQuery(sql);
 			while (resultSet.next()) {
-				int id = resultSet.getInt("id");
-				String name = resultSet.getString("name");
-				double salary = resultSet.getDouble("salary");
-				LocalDate startDate = resultSet.getDate("start").toLocalDate();
-				employeePayrollList.add(new Contact(id, salary, name, startDate));
+				String gender = resultSet.getString("Gender");
+				double salary = resultSet.getDouble(operation);
+				employeePayrollMap.put(gender, salary);
 			}
 		} catch (SQLException e) {
-			e.printStackTrace();
+			throw new CustomPayrollException("Unable to execute query of function on salary");
 		}
-		return employeePayrollList;
+		return employeePayrollMap;
 	}
 
 	// Updating employee data into database
@@ -112,8 +128,7 @@ public class EmpPayrollDBService {
 		return employeePayrollList;
 	}
 
-	// Method to execute sql statement, operate on resultSet and return employee
-	// payroll list
+	// Execute sql statement, operate on resultSet and return employee payroll list
 	public List<Contact> executeSQLAndReturnEmployeeList(String sql) throws CustomPayrollException {
 		List<Contact> empPayrollList = new ArrayList<>();
 		try (Connection con = getConnection();) {
@@ -124,6 +139,23 @@ public class EmpPayrollDBService {
 			throw new CustomPayrollException("Unable to fetch data from Database!!");
 		}
 		return empPayrollList;
+	}
+
+	// Method to get ResultSet of query performed and storing into memory as list
+	private List<Contact> getEmployeePayrollData(ResultSet resultSet) {
+		List<Contact> employeePayrollList = new ArrayList<>();
+		try {
+			while (resultSet.next()) {
+				int id = resultSet.getInt("id");
+				String name = resultSet.getString("name");
+				double salary = resultSet.getDouble("salary");
+				LocalDate startDate = resultSet.getDate("start").toLocalDate();
+				employeePayrollList.add(new Contact(id, salary, name, startDate));
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		return employeePayrollList;
 	}
 
 	// Use of prepared statement to get employee data from DB

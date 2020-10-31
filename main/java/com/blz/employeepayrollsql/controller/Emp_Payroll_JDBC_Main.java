@@ -5,6 +5,8 @@ package com.blz.employeepayrollsql.controller;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
+
 import com.blz.employeepayrollsql.model.Contact;
 import com.blz.employeepayrollsql.model.CustomPayrollException;
 import com.blz.employeepayrollsql.model.EmpPayrollDBService;
@@ -35,8 +37,7 @@ public class Emp_Payroll_JDBC_Main {
 		return this.employeePayrollList;
 	}
 
-	// Reading all the employee from employee_payroll DB for start in given date
-	// range
+	// Reading employee from employee_payroll DB for start in given date range
 	public List<Contact> readEmployeePayrollForGivenDateRange(IOService ioService, LocalDate startDate,
 			LocalDate endDate) throws CustomPayrollException {
 		if (ioService.equals(IOService.DB_IO)) {
@@ -45,7 +46,17 @@ public class Emp_Payroll_JDBC_Main {
 		return employeePayrollList;
 	}
 
-	// updating salary for employee if salary got modified in database then in
+	// Reading employee from employee_payroll DB with average salary group by gender
+	public Map<String, Double> readAverageSalaryByGender(IOService ioService) throws CustomPayrollException {
+		return employeePayrollDBServicebj.getAverageSalaryByGender();
+	}
+
+	// Reading employee from employee_payroll DB with average salary group by gender
+	public Map<String, Double> readMaxSalaryByGender(IOService ioService) throws CustomPayrollException {
+		return employeePayrollDBServicebj.getMaxSalaryByGender();
+	}
+
+	// updating salary for employee in DB and if salary got modified in database then in
 	// memory
 	public void updateEmployeeSalaryInDBThenInList(String name, double salary) throws CustomPayrollException {
 		int result = employeePayrollDBServicebj.updateEmployeeData(name, salary);
