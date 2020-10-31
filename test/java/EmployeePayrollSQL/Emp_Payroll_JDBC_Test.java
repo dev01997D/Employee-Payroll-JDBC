@@ -13,6 +13,7 @@ import com.blz.employeepayrollsql.model.CustomPayrollException;
 
 import junit.framework.Assert;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @SuppressWarnings("deprecation")
@@ -45,5 +46,15 @@ public class Emp_Payroll_JDBC_Test {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+	}
+
+	@Test
+	public void givenDateRange_WhenRetrieved_shouldMatchEmployeeCount() throws CustomPayrollException {
+		empPayrollService.readEmployeePayrollDatabase(IOService.DB_IO);
+		LocalDate startDate = LocalDate.of(2018, 02, 15);
+		LocalDate endDate = LocalDate.now();
+		List<Contact> empPayrollList = empPayrollService.readEmployeePayrollForGivenDateRange(IOService.DB_IO,
+				startDate, endDate);
+		Assert.assertEquals(3, empPayrollList.size());
 	}
 }

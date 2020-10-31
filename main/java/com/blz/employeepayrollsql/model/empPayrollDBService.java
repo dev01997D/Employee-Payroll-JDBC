@@ -1,6 +1,7 @@
 package com.blz.employeepayrollsql.model;
 
 import java.sql.Connection;
+import java.sql.Date;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -44,35 +45,14 @@ public class EmpPayrollDBService {
 	// Reading all the employees data from the DB
 	public List<Contact> readData() throws CustomPayrollException {
 		String sql = "SELECT * FROM employee_payroll";
-		List<Contact> empPayrollList = new ArrayList<>();
-
-		try (Connection con = getConnection();) {
-			Statement stmt = con.createStatement();
-			ResultSet resultSet = stmt.executeQuery(sql);
-			empPayrollList = this.getEmployeePayrollData(resultSet);
-		} catch (SQLException e) {
-			throw new CustomPayrollException("Unable to fetch data from Database!!");
-		}
-		return empPayrollList;
+		return this.executeSQLAndReturnEmployeeList(sql);
 	}
 
-	// Updating employee data into database
-	public int updateEmployeeData(String name, double salary) throws CustomPayrollException {
-		return this.updateEmployeeDataUsingPreparedStatement(name, salary);
-	}
-
-	// Updating salary for given employee using Prepared statement
-	private int updateEmployeeDataUsingPreparedStatement(String name, double salary) throws CustomPayrollException {
-		String sql = "UPDATE employee_payroll set salary =? where name =?";
-		int noOfRowsAffected = 0;
-		try (Connection con = getConnection(); PreparedStatement preparedStatement = con.prepareStatement(sql);) {
-			preparedStatement.setDouble(1, salary);
-			preparedStatement.setString(2, name);
-			noOfRowsAffected = preparedStatement.executeUpdate();
-		} catch (SQLException e) {
-			throw new CustomPayrollException("Unable to fetch data from Database!!");
-		}
-		return noOfRowsAffected;
+	// getting employee who has joined for given date range
+	public List<Contact> getEmployeeForDateRange(LocalDate startDate, LocalDate endDate) throws CustomPayrollException {
+		String sql = String.format("SELECT * FROM EMPLOYEE_PAYROLL WHERE START BETWEEN  '%s'  and '%s';",
+				Date.valueOf(startDate), Date.valueOf(endDate));
+		return this.executeSQLAndReturnEmployeeList(sql);
 	}
 
 	// Method to get ResultSet of query performed and storing into memory as list
@@ -92,12 +72,35 @@ public class EmpPayrollDBService {
 		return employeePayrollList;
 	}
 
-	// Getting employee data with given name for comparison with DB and list
-	public List<Contact> getEmployeePayrolldata(String name) throws CustomPayrollException {
-		List<Contact> employeePayrollList = null;
-		// System.out.println(preparedStmt == null);
+	// Updating employee data into database
+	public int updateEmployeeData(String name, double salary) throws CustomPayrollException {
+		return this.updateEmployeeDataUsingPreparedStatement(name, salary);
+	}
+
+	// Updating salary for given employee using Prepared statement
+	private int updateEmployeeDataUsingPreparedStatement(String name, double salary) throws CustomPayrollException {
+		String sql = "UPDATE employee_payroll set salary =? where name =?";
 		if (preparedStmt == null)
-			preparedStatementForEmployeeData();
+			preparedStatementForEmployeeData(sql);
+		int noOfRowsAffected = 0;
+		try {
+			preparedStmt.setDouble(1, salary);
+			preparedStmt.setString(2, name);
+			noOfRowsAffected = preparedStmt.executeUpdate();
+		} catch (SQLException e) {
+			throw new CustomPayrollException("Unable to fetch data from Database!!");
+		}
+		preparedStmt = null;
+		return noOfRowsAffected;
+	}
+
+	// Getting employee data with given name for comparison with DB and memory using
+	// prepared statement
+	public List<Contact> getEmployeePayrolldata(String name) throws CustomPayrollException {
+		String sql = "SELECT * FROM employee_payroll WHERE name=?";
+		List<Contact> employeePayrollList = null;
+		if (preparedStmt == null)
+			preparedStatementForEmployeeData(sql);
 		try {
 			preparedStmt.setString(1, name);
 			ResultSet resultSet = preparedStmt.executeQuery();
@@ -105,15 +108,28 @@ public class EmpPayrollDBService {
 		} catch (SQLException e) {
 			throw new CustomPayrollException("Error!! during employee with given name");
 		}
-		System.out.println(employeePayrollList);
+		preparedStmt = null;
 		return employeePayrollList;
 	}
 
+	// Method to execute sql statement, operate on resultSet and return employee
+	// payroll list
+	public List<Contact> executeSQLAndReturnEmployeeList(String sql) throws CustomPayrollException {
+		List<Contact> empPayrollList = new ArrayList<>();
+		try (Connection con = getConnection();) {
+			Statement stmt = con.createStatement();
+			ResultSet resultSet = stmt.executeQuery(sql);
+			empPayrollList = this.getEmployeePayrollData(resultSet);
+		} catch (SQLException e) {
+			throw new CustomPayrollException("Unable to fetch data from Database!!");
+		}
+		return empPayrollList;
+	}
+
 	// Use of prepared statement to get employee data from DB
-	private void preparedStatementForEmployeeData() throws CustomPayrollException {
+	private void preparedStatementForEmployeeData(String sql) throws CustomPayrollException {
 		try {
 			Connection con = getConnection();
-			String sql = "SELECT * FROM employee_payroll WHERE name=?";
 			preparedStmt = con.prepareStatement(sql);
 		} catch (SQLException e) {
 			throw new CustomPayrollException("Error!! during prepared statemennt");

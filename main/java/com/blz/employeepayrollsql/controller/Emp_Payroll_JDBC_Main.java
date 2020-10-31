@@ -3,6 +3,7 @@
  */
 package com.blz.employeepayrollsql.controller;
 
+import java.time.LocalDate;
 import java.util.List;
 import com.blz.employeepayrollsql.model.Contact;
 import com.blz.employeepayrollsql.model.CustomPayrollException;
@@ -32,6 +33,16 @@ public class Emp_Payroll_JDBC_Main {
 			this.employeePayrollList = employeePayrollDBServicebj.readData();
 		}
 		return this.employeePayrollList;
+	}
+
+	// Reading all the employee from employee_payroll DB for start in given date
+	// range
+	public List<Contact> readEmployeePayrollForGivenDateRange(IOService ioService, LocalDate startDate,
+			LocalDate endDate) throws CustomPayrollException {
+		if (ioService.equals(IOService.DB_IO)) {
+			this.employeePayrollList = employeePayrollDBServicebj.getEmployeeForDateRange(startDate, endDate);
+		}
+		return employeePayrollList;
 	}
 
 	// updating salary for employee if salary got modified in database then in
