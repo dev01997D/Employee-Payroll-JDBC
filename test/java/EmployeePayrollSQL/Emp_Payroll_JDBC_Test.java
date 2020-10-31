@@ -15,6 +15,7 @@ import junit.framework.Assert;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
 
 @SuppressWarnings("deprecation")
 public class Emp_Payroll_JDBC_Test {
@@ -56,5 +57,23 @@ public class Emp_Payroll_JDBC_Test {
 		List<Contact> empPayrollList = empPayrollService.readEmployeePayrollForGivenDateRange(IOService.DB_IO,
 				startDate, endDate);
 		Assert.assertEquals(3, empPayrollList.size());
+	}
+
+	@Test
+	public void givenPayrollData_WhenAverageSalaryRetrievedByGender_ShouldReturnCorrectValue()
+			throws CustomPayrollException {
+		empPayrollService.readEmployeePayrollDatabase(IOService.DB_IO);
+		Map<String, Double> averageSalaryByGender = empPayrollService.readAverageSalaryByGender(IOService.DB_IO);
+		Assert.assertTrue(
+				averageSalaryByGender.get("M").equals(2000000.00) && averageSalaryByGender.get("F").equals(3000000.00));
+	}
+
+	@Test
+	public void givenPayrollData_WhenMaxSalaryRetrievedByGender_ShouldReturnCorrectValue()
+			throws CustomPayrollException {
+		empPayrollService.readEmployeePayrollDatabase(IOService.DB_IO);
+		Map<String, Double> maxSalaryByGender = empPayrollService.readMaxSalaryByGender(IOService.DB_IO);
+		Assert.assertTrue(
+				maxSalaryByGender.get("M").equals(3000000.00) && maxSalaryByGender.get("F").equals(3000000.00));
 	}
 }
