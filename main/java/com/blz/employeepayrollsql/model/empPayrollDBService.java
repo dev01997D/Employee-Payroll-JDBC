@@ -110,23 +110,75 @@ public class EmpPayrollDBService {
 		return noOfRowsAffected;
 	}
 
-	public Contact addEmployeeToDB(String name, String gender, double salary, LocalDate startDate)
+	public Contact addEmployeeToDBUC7(String name, String gender, double salary, LocalDate startDate)
 			throws CustomPayrollException {
-		String sql = String.format("INSERT INTO employee_payroll (name, Gender, Salary, start) VALUES ('%s', '%s','%s','%s')",
-				                                                 name, gender, salary,  Date.valueOf(startDate));
+		String sql = String.format(
+				"INSERT INTO employee_payroll (name, Gender, Salary, start) VALUES ('%s', '%s','%s','%s')", name,
+				gender, salary, Date.valueOf(startDate));
 		int rowsAffected, employeeId = -1;
 		try (Connection con = getConnection();) {
 			Statement stmt = con.createStatement();
 			rowsAffected = stmt.executeUpdate(sql, Statement.RETURN_GENERATED_KEYS);
-			if(rowsAffected!=0) {
-				ResultSet resultSet=stmt.getGeneratedKeys();
-				if(resultSet.next())
+			if (rowsAffected != 0) {
+				ResultSet resultSet = stmt.getGeneratedKeys();
+				if (resultSet.next())
 					employeeId = resultSet.getInt(1);
-			}		
+			}
 		} catch (SQLException e) {
 			throw new CustomPayrollException("Error!! Unable to insert employee to Database");
 		}
 		return new Contact(employeeId, salary, name, startDate);
+	}
+
+	//Adding of employee as well as inserting to payroll_details
+	public Contact addEmployeeToDBUC8(String name, String gender, double salary, LocalDate startDate)
+			throws CustomPayrollException {
+		int rowsAffected, employeeId = -1;
+		Connection con = null;
+		Contact contact = null;
+		try {
+			con = getConnection();
+		} catch (CustomPayrollException e) {
+			e.printStackTrace();
+		}
+		try (Statement stmt = con.createStatement();) {
+			String sql = String.format(
+					"INSERT INTO employee_payroll (name, Gender, Salary, start) VALUES ('%s', '%s','%s','%s')", name,
+					gender, salary, Date.valueOf(startDate));
+			rowsAffected = stmt.executeUpdate(sql, Statement.RETURN_GENERATED_KEYS);
+			if (rowsAffected != 0) {
+				ResultSet resultSet = stmt.getGeneratedKeys();
+				if (resultSet.next())
+					employeeId = resultSet.getInt(1);
+			}
+		} catch (SQLException e) {
+			throw new CustomPayrollException("Error!! Unable to insert employee to Database");
+		}
+
+		try (Statement stmt = con.createStatement()) {
+			double deductions = salary * 0.2;
+			double taxablePay = salary - deductions;
+			double tax = taxablePay * 0.1;
+			double netPay = salary - tax;
+			String sql = String.format(
+					"INSERT INTO payroll_details (emp_id, basic_pay, deductions, taxable_pay, income_tax, net_pay) VALUES (%s,%s,%s,%s,%s,%s)",
+					employeeId, salary, deductions, taxablePay, tax, netPay);
+			int rowAffected = stmt.executeUpdate(sql);
+			if (rowAffected == 1) {
+				contact = new Contact(employeeId, salary, name, startDate);
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		} finally {
+			if (con != null) {
+				try {
+					con.close();
+				} catch (SQLException e) {
+					e.printStackTrace();
+				}
+			}
+		}
+		return contact;
 	}
 
 	// Getting employee data with given name for comparison with DB and memory using
