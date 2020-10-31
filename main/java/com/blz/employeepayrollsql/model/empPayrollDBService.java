@@ -130,7 +130,7 @@ public class EmpPayrollDBService {
 		return new Contact(employeeId, salary, name, startDate);
 	}
 
-	//Adding of employee as well as inserting to payroll_details
+	// Adding of employee as well as inserting to payroll_details
 	public Contact addEmployeeToDBUC8(String name, String gender, double salary, LocalDate startDate)
 			throws CustomPayrollException {
 		int rowsAffected, employeeId = -1;
@@ -138,7 +138,10 @@ public class EmpPayrollDBService {
 		Contact contact = null;
 		try {
 			con = getConnection();
+			con.setAutoCommit(false);
 		} catch (CustomPayrollException e) {
+			e.printStackTrace();
+		} catch (SQLException e) {
 			e.printStackTrace();
 		}
 		try (Statement stmt = con.createStatement();) {
@@ -152,7 +155,13 @@ public class EmpPayrollDBService {
 					employeeId = resultSet.getInt(1);
 			}
 		} catch (SQLException e) {
-			throw new CustomPayrollException("Error!! Unable to insert employee to Database");
+			try {
+				con.rollback();
+				return contact;
+			} catch (SQLException e1) {
+				e1.printStackTrace();
+			}
+			throw new CustomPayrollException("Error!! Unable to insert employee details into employee_payroll Database");
 		}
 
 		try (Statement stmt = con.createStatement()) {
@@ -161,15 +170,26 @@ public class EmpPayrollDBService {
 			double tax = taxablePay * 0.1;
 			double netPay = salary - tax;
 			String sql = String.format(
-					"INSERT INTO payroll_details (emp_id, basic_pay, deductions, taxable_pay, income_tax, net_pay) VALUES (%s,%s,%s,%s,%s,%s)",
+					"INSERT INTO payroll_details (emp_id, basic_pay, deductions, taxable_pay, income_tax, net_pay) VALUES ('%s','%s','%s','%s','%s','%s')",
 					employeeId, salary, deductions, taxablePay, tax, netPay);
 			int rowAffected = stmt.executeUpdate(sql);
 			if (rowAffected == 1) {
 				contact = new Contact(employeeId, salary, name, startDate);
 			}
 		} catch (SQLException e) {
+			try {
+				con.rollback();
+			} catch (SQLException e1) {
+				e1.printStackTrace();
+			}
+			throw new CustomPayrollException("Error!! Unable to insert salary details into payroll details Database");
+		} 
+		try {
+			con.commit();
+		} catch (SQLException e) {
 			e.printStackTrace();
-		} finally {
+		}
+		finally {
 			if (con != null) {
 				try {
 					con.close();
