@@ -1,13 +1,21 @@
 package com.blz.employeepayrollsql.model;
 
 import java.time.LocalDate;
+import java.util.Arrays;
 
 public class Contact {
 
 	public int id;
 	public double salary;
 	public String name;
+	public String address;
 	public LocalDate startDate;
+	public String gender;
+	public String companyName;
+	public int companyId;
+	public String department[];
+	public int deptId;
+	public String deptName;
 
 	// Constructor
 	public Contact(int id, double salary, String name) {
@@ -16,16 +24,37 @@ public class Contact {
 		this.name = name;
 	}
 
-	//	 Constructor
+	// Constructor
 	public Contact(int id, double salary, String name, LocalDate startDate) {
 		this(id, salary, name);
 		this.startDate = startDate;
 	}
 
-	public Contact() {
+	public Contact(int id, String name, String gender, double salary, LocalDate startDate) {
+		this(id, salary, name, startDate);
+		this.gender = gender;
 	}
 
-	//Override Equals method
+//	public Contact(int id, String name, String gender, double salary, LocalDate startDate,
+//			       String companyName, int companyId, String department[]) {
+//		this(id, name, gender, salary, startDate);
+//		this.companyName = companyName;
+//		this.companyId = companyId;
+//		this.department = department;
+//	}
+
+	public Contact(int id, int companyId, String name, String address, String gender, String companyName, int deptId,
+			String deptName, double salary, LocalDate startDate, String[] department) {
+		this(id, name, gender, salary, startDate);
+		this.companyId = companyId;
+		this.address = address;
+		this.companyName = companyName;
+		this.deptId = deptId;
+		this.deptName = deptName;
+		this.department = department;
+	}
+
+	// Override Equals method
 	@Override
 	public boolean equals(Object obj) {
 		if (this == obj)
@@ -52,8 +81,26 @@ public class Contact {
 		return true;
 	}
 
+	public void printDepartments() {
+		String departments[] = this.getDepartment();
+		for (String s : departments) {
+			System.out.println("id: " + this.getId() + ":" + s);
+		}
+	}
+
+	private int getId() {
+		return id;
+	}
+
+	private String[] getDepartment() {
+		return department;
+	}
+
 	@Override
 	public String toString() {
-		return "EmployeePayrollData [id=" + id + ", salary=" + salary + ", name=" + name + "]";
+		return "Contact [id=" + id + ", salary=" + salary + ", name=" + name + ", address=" + address + ", startDate="
+				+ startDate + ", gender=" + gender + ", companyName=" + companyName + ", companyId=" + companyId
+				+ ", department=" + Arrays.toString(department) + ", deptId=" + deptId + ", deptName=" + deptName + "]";
 	}
+	
 }

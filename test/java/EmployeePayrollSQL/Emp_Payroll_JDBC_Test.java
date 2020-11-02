@@ -31,7 +31,7 @@ public class Emp_Payroll_JDBC_Test {
 		List<Contact> empPayrollData;
 		try {
 			empPayrollData = empPayrollService.readEmployeePayrollDatabase(IOService.DB_IO);
-			Assert.assertEquals(3, empPayrollData.size());
+			Assert.assertEquals(5, empPayrollData.size());
 		} catch (CustomPayrollException e) {
 			e.printStackTrace();
 		}
@@ -41,47 +41,11 @@ public class Emp_Payroll_JDBC_Test {
 	public void givenNewSalaryForEmployee_WhenUpdatedByPreapredStmt_ShouldSyncWithDB() {
 		try {
 			empPayrollService.readEmployeePayrollDatabase(IOService.DB_IO);
-			empPayrollService.updateEmployeeSalaryInDBThenInList("Terisa", 3000000.00);
-			boolean result = empPayrollService.checkEmployeePayrollListSyncWithDB("Terisa");
+			empPayrollService.updateEmployeeSalaryInDBThenInList("Dev", 500000.00);
+			boolean result = empPayrollService.checkEmployeePayrollListSyncWithDB("Dev");
 			Assert.assertTrue(result);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-	}
-
-	@Test
-	public void givenDateRange_WhenRetrieved_shouldMatchEmployeeCount() throws CustomPayrollException {
-		empPayrollService.readEmployeePayrollDatabase(IOService.DB_IO);
-		LocalDate startDate = LocalDate.of(2018, 02, 15);
-		LocalDate endDate = LocalDate.now();
-		List<Contact> empPayrollList = empPayrollService.readEmployeePayrollForGivenDateRange(IOService.DB_IO,
-				startDate, endDate);
-		Assert.assertEquals(3, empPayrollList.size());
-	}
-
-	@Test
-	public void givenPayrollData_WhenAverageSalaryRetrievedByGender_ShouldReturnCorrectValue()
-			throws CustomPayrollException {
-		empPayrollService.readEmployeePayrollDatabase(IOService.DB_IO);
-		Map<String, Double> averageSalaryByGender = empPayrollService.readAverageSalaryByGender(IOService.DB_IO);
-		Assert.assertTrue(
-				averageSalaryByGender.get("M").equals(2000000.00) && averageSalaryByGender.get("F").equals(3000000.00));
-	}
-
-	@Test
-	public void givenPayrollData_WhenMaxSalaryRetrievedByGender_ShouldReturnCorrectValue()
-			throws CustomPayrollException {
-		empPayrollService.readEmployeePayrollDatabase(IOService.DB_IO);
-		Map<String, Double> maxSalaryByGender = empPayrollService.readMaxSalaryByGender(IOService.DB_IO);
-		Assert.assertTrue(
-				maxSalaryByGender.get("M").equals(3000000.00) && maxSalaryByGender.get("F").equals(3000000.00));
-	}
-
-	@Test
-	public void givenNewEmployee_whenAdded_shouldSyncWithDB() throws CustomPayrollException {
-		empPayrollService.readEmployeePayrollDatabase(IOService.DB_IO);
-		empPayrollService.addEmployeeToEmployeePayrollDB("Mark", "M", 5000000.00, LocalDate.now());
-		boolean result = empPayrollService.checkEmployeePayrollListSyncWithDB("Mark");
-		Assert.assertTrue(result);
 	}
 }
