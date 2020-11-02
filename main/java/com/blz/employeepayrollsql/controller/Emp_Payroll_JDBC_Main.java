@@ -82,6 +82,11 @@ public class Emp_Payroll_JDBC_Main {
 	// Checking if two employee are equal or not
 	public boolean checkEmployeePayrollListSyncWithDB(String name) throws CustomPayrollException {
 		List<Contact> empPayrollDataList = normalisedDBServiceObj.getEmployeePayrollData(name);
-		return empPayrollDataList.get(0).equals(getEmployeePayrollData(name));
+		return empPayrollDataList.get(0).name.equalsIgnoreCase(getEmployeePayrollData(name).name);
+	}
+
+	public void addEmployeeToEmployeePayrollDB(int company_id, String name, String address, String gender, int dept_id,
+			double salary, LocalDate startDate) throws CustomPayrollException {
+		employeePayrollList.add(normalisedDBServiceObj.addEmployeeToDB(company_id, name, address, gender, dept_id, salary, startDate));
 	}
 }
