@@ -41,11 +41,31 @@ public class Emp_Payroll_JDBC_Test {
 	public void givenNewSalaryForEmployee_WhenUpdatedByPreapredStmt_ShouldSyncWithDB() {
 		try {
 			empPayrollService.readEmployeePayrollDatabase(IOService.DB_IO);
-			empPayrollService.updateEmployeeSalaryInDBThenInList("Dev", 500000.00);
+			empPayrollService.updateEmployeeSalaryInDBThenInList("Dev", 1500000.00);
 			boolean result = empPayrollService.checkEmployeePayrollListSyncWithDB("Dev");
 			Assert.assertTrue(result);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+	}
+
+	@Test
+	public void givenDateRange_WhenRetrieved_shouldMatchEmployeeCount() throws CustomPayrollException {
+		empPayrollService.readEmployeePayrollDatabase(IOService.DB_IO);
+		LocalDate startDate = LocalDate.of(2018, 02, 15);
+		LocalDate endDate = LocalDate.now();
+		List<Contact> empPayrollList = empPayrollService.readEmployeePayrollForGivenDateRange(IOService.DB_IO,
+				startDate, endDate);
+		System.out.println(empPayrollList);
+		Assert.assertEquals(1, empPayrollList.size());
+	}
+
+	@Test
+	public void givenPayrollData_WhenAverageSalaryRetrievedByGender_ShouldReturnCorrectValue()
+			throws CustomPayrollException {
+		empPayrollService.readEmployeePayrollDatabase(IOService.DB_IO);
+		Map<String, Double> averageSalaryByGender = empPayrollService.readAverageSalaryByGender(IOService.DB_IO);
+		Assert.assertTrue(
+				averageSalaryByGender.get("M").equals(1750000.00) && averageSalaryByGender.get("F").equals(3000000.00));
 	}
 }

@@ -1,6 +1,7 @@
 package com.blz.employeepayrollsql.model;
 
 import java.sql.Connection;
+import java.sql.Date;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -8,7 +9,9 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class EmpPayrollDBServiceNormalised {
 	private static EmpPayrollDBServiceNormalised normalisedDBServiceObj;
@@ -48,7 +51,7 @@ public class EmpPayrollDBServiceNormalised {
 			while (resultSet.next()) {
 				int id = resultSet.getInt("emp_id");
 				String name = resultSet.getString("Name");
-				String address=resultSet.getString("address");
+				String address = resultSet.getString("address");
 				String gender = resultSet.getString("gender");
 				int companyId = resultSet.getInt("company_id");
 				String companyName = resultSet.getString("company_name");
@@ -72,7 +75,7 @@ public class EmpPayrollDBServiceNormalised {
 	}
 
 	private int updateEmployeeDataUsingPreparedStatement(String name, double salary) throws CustomPayrollException {
-		int rowsAffected=0;
+		int rowsAffected = 0;
 		String sql = String.format("UPDATE payroll SET basic_pay = %.2f WHERE emp_id = "
 				+ "(SELECT emp_id from employee WHERE name = '%s');", salary, name);
 		try (Connection connection = connectionObj.getConnection();) {
@@ -103,13 +106,38 @@ public class EmpPayrollDBServiceNormalised {
 			Connection connection = connectionObj.getConnection();
 			String sql = "SELECT e.emp_id, e.company_id, e.Name, e.address, e.gender, c.company_name, ed.dept_id, d.dept_name, p.basic_pay, p.start "
 					+ "from employee e right join employee_department ed using(emp_id) "
-					+ "JOIN department d on ed.dept_id=d.dept_id "
-					+ "JOIN company c on c.company_id=e.company_id "
-					+ "JOIN payroll p on p.emp_id=e.emp_id "
-					+ "WHERE e.name = ?";
+					+ "JOIN department d on ed.dept_id=d.dept_id " + "JOIN company c on c.company_id=e.company_id "
+					+ "JOIN payroll p on p.emp_id=e.emp_id " + "WHERE e.name = ?";
 			preparedStmt = connection.prepareStatement(sql);
 		} catch (SQLException e) {
 			throw new CustomPayrollException("Unable to do prepared statement execution");
 		}
+	}
+
+	public List<Contact> getEmployeeForDateRange(LocalDate startDate, LocalDate endDate) throws CustomPayrollException {
+		String sql = String.format(
+				"SELECT e.emp_id, e.company_id, e.Name, e.address, e.gender, c.company_name, ed.dept_id, d.dept_name, p.basic_pay, p.start "
+						+ "from employee e right join employee_department ed using(emp_id) "
+						+ "JOIN department d on ed.dept_id=d.dept_id " + "JOIN company c on c.company_id=e.company_id "
+						+ "JOIN payroll p on p.emp_id=e.emp_id "
+						+ "WHERE p.start BETWEEN CAST('2019-01-01' AS DATE) AND DATE(NOW());");
+		return getEmployeePayrollDataUsingSQLQuery(sql);
+	}
+
+	public Map<String, Double> getAverageSalaryByGender() throws CustomPayrollException {
+		String sql = "SELECT e.gender, AVG(P.basic_pay) as avg_salary FROM employee e NATURAL JOIN payroll p GROUP BY gender;";
+		Map<String, Double> genderToAverageSalaryMap = new HashMap<>();
+		try (Connection connection = connectionObj.getConnection();) {
+			PreparedStatement prepareStatement = connection.prepareStatement(sql);
+			ResultSet resultSet = prepareStatement.executeQuery(sql);
+			while (resultSet.next()) {
+				String gender = resultSet.getString("gender");
+				double salary = resultSet.getDouble("avg_salary");
+				genderToAverageSalaryMap.put(gender, salary);
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		return genderToAverageSalaryMap;
 	}
 }

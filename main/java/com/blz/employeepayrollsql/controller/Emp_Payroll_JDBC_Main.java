@@ -46,7 +46,8 @@ public class Emp_Payroll_JDBC_Main {
 		return this.employeePayrollList;
 	}
 
-	// updating salary for employee in DB and if salary got modified in database then in
+	// updating salary for employee in DB and if salary got modified in database
+	// then in
 	// memory
 	public void updateEmployeeSalaryInDBThenInList(String name, double salary) throws CustomPayrollException {
 		int result = normalisedDBServiceObj.updateEmployeeData(name, salary);
@@ -54,9 +55,22 @@ public class Emp_Payroll_JDBC_Main {
 			return;
 		}
 		Contact contact = this.getEmployeePayrollData(name);
-//		System.out.println(contact);
 		if (contact != null)
 			contact.salary = salary;
+	}
+
+	// Reading employee from employee_payroll DB for start in given date range
+	public List<Contact> readEmployeePayrollForGivenDateRange(IOService ioService, LocalDate startDate,
+			LocalDate endDate) throws CustomPayrollException {
+		if (ioService.equals(IOService.DB_IO)) {
+			this.employeePayrollList = normalisedDBServiceObj.getEmployeeForDateRange(startDate, endDate);
+		}
+		return employeePayrollList;
+	}
+
+	// Reading employee from employee_payroll DB with average salary group by gender
+	public Map<String, Double> readAverageSalaryByGender(IOService ioService) throws CustomPayrollException {
+		return normalisedDBServiceObj.getAverageSalaryByGender();
 	}
 
 	// Filter the employee with given name from the employee list
