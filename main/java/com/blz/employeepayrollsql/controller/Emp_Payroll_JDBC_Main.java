@@ -10,6 +10,7 @@ import java.util.Map;
 import com.blz.employeepayrollsql.model.Contact;
 import com.blz.employeepayrollsql.model.CustomPayrollException;
 import com.blz.employeepayrollsql.model.EmpPayrollDBService;
+import com.blz.employeepayrollsql.model.EmpPayrollDBServiceNormalised;
 
 public class Emp_Payroll_JDBC_Main {
 	public enum IOService {
@@ -17,11 +18,14 @@ public class Emp_Payroll_JDBC_Main {
 	}
 
 	private List<Contact> employeePayrollList;
-	private static EmpPayrollDBService employeePayrollDBServicebj;
+	private Map<String, Double> employeePayrollMap;
+	private EmpPayrollDBService employeePayrollDBServicebj;
+	private EmpPayrollDBServiceNormalised normalisedDBServiceObj;
 
 	// Creating Singleton object of EmpPayrollDBService
 	public Emp_Payroll_JDBC_Main() {
 		employeePayrollDBServicebj = EmpPayrollDBService.getInstance();
+		normalisedDBServiceObj = EmpPayrollDBServiceNormalised.getInstance();
 	}
 
 	public Emp_Payroll_JDBC_Main(List<Contact> empPayrollList) {
@@ -29,41 +33,28 @@ public class Emp_Payroll_JDBC_Main {
 		this.employeePayrollList = empPayrollList;
 	}
 
+	public Emp_Payroll_JDBC_Main(Map<String, Double> employeePayrollMap) {
+		this();
+		this.employeePayrollMap = employeePayrollMap;
+	}
+
 	// Reading all the employee data from table employee_payroll present in DB
 	public List<Contact> readEmployeePayrollDatabase(IOService ioService) throws CustomPayrollException {
 		if (ioService.equals(IOService.DB_IO)) {
-			this.employeePayrollList = employeePayrollDBServicebj.readData();
+			this.employeePayrollList = normalisedDBServiceObj.readData();
 		}
 		return this.employeePayrollList;
-	}
-
-	// Reading employee from employee_payroll DB for start in given date range
-	public List<Contact> readEmployeePayrollForGivenDateRange(IOService ioService, LocalDate startDate,
-			LocalDate endDate) throws CustomPayrollException {
-		if (ioService.equals(IOService.DB_IO)) {
-			this.employeePayrollList = employeePayrollDBServicebj.getEmployeeForDateRange(startDate, endDate);
-		}
-		return employeePayrollList;
-	}
-
-	// Reading employee from employee_payroll DB with average salary group by gender
-	public Map<String, Double> readAverageSalaryByGender(IOService ioService) throws CustomPayrollException {
-		return employeePayrollDBServicebj.getAverageSalaryByGender();
-	}
-
-	// Reading employee from employee_payroll DB with average salary group by gender
-	public Map<String, Double> readMaxSalaryByGender(IOService ioService) throws CustomPayrollException {
-		return employeePayrollDBServicebj.getMaxSalaryByGender();
 	}
 
 	// updating salary for employee in DB and if salary got modified in database then in
 	// memory
 	public void updateEmployeeSalaryInDBThenInList(String name, double salary) throws CustomPayrollException {
-		int result = employeePayrollDBServicebj.updateEmployeeData(name, salary);
+		int result = normalisedDBServiceObj.updateEmployeeData(name, salary);
 		if (result == 0) {
 			return;
 		}
 		Contact contact = this.getEmployeePayrollData(name);
+//		System.out.println(contact);
 		if (contact != null)
 			contact.salary = salary;
 	}
@@ -76,11 +67,7 @@ public class Emp_Payroll_JDBC_Main {
 
 	// Checking if two employee are equal or not
 	public boolean checkEmployeePayrollListSyncWithDB(String name) throws CustomPayrollException {
-		List<Contact> empPayrollDataList = employeePayrollDBServicebj.getEmployeePayrolldata(name);
+		List<Contact> empPayrollDataList = normalisedDBServiceObj.getEmployeePayrollData(name);
 		return empPayrollDataList.get(0).equals(getEmployeePayrollData(name));
-	}
-
-	public void addEmployeeToEmployeePayrollDB(String name, String gender, double salary, LocalDate start) throws CustomPayrollException {
-		employeePayrollList.add(employeePayrollDBServicebj.addEmployeeToDBUC8(name, gender, salary, start));
 	}
 }

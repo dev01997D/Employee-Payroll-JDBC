@@ -31,12 +31,6 @@ public class EmpPayrollDBService {
 		Connection con;
 
 		try {
-			Class.forName("com.mysql.jdbc.Driver");
-		} catch (ClassNotFoundException e) {
-			throw new CustomPayrollException("Error!!! Unable to load the driver");
-		}
-
-		try {
 			con = DriverManager.getConnection(jdbcURL, userName, password);
 		} catch (SQLException e) {
 			throw new CustomPayrollException("Error!!! Unable to establish the Connection with JDBC");
