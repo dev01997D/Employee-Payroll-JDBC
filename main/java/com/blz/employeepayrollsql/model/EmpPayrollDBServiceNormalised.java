@@ -2,7 +2,6 @@ package com.blz.employeepayrollsql.model;
 
 import java.sql.Connection;
 import java.sql.Date;
-import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -139,5 +138,94 @@ public class EmpPayrollDBServiceNormalised {
 			e.printStackTrace();
 		}
 		return genderToAverageSalaryMap;
+	}
+
+	public Contact addEmployeeToDB(int company_id, String name, String address, String gender, int dept_id,
+			double salary, LocalDate startDate) throws CustomPayrollException {
+		int employeeId = -1;
+		Connection connection = null;
+		Contact contact = null;
+		try {
+			connection = connectionObj.getConnection();
+			connection.setAutoCommit(false);
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+
+		try (Statement statement = connection.createStatement()) {
+			String sql = String.format(
+					"INSERT INTO employee (company_id, name, address, gender) VALUES ('%s','%s','%s','%s');",
+					company_id, name, address, gender);
+			int rowAffected = statement.executeUpdate(sql, Statement.RETURN_GENERATED_KEYS);
+			if (rowAffected == 1) {
+				ResultSet resultSet = statement.getGeneratedKeys();
+				if (resultSet.next())
+					employeeId = resultSet.getInt(1);
+			}
+			contact = new Contact(employeeId, company_id, name, address, gender);
+		} catch (SQLException e) {
+			e.printStackTrace();
+			try {
+				connection.rollback();
+			} catch (SQLException ex) {
+				ex.printStackTrace();
+			}
+			return contact;
+		}
+
+		try (Statement statement = connection.createStatement()) {
+			double deductions = salary * 0.2;
+			double taxablePay = salary - deductions;
+			double tax = taxablePay * 0.1;
+			double netPay = salary - tax;
+			String sql = String.format(
+					"INSERT INTO payroll (emp_id, basic_pay, deductions, taxable_income, income_tax ,net_pay, start) VALUES ('%s', '%s', '%s', '%s', '%s', '%s', '%s')",
+					employeeId, salary, deductions, taxablePay, tax, netPay, Date.valueOf(startDate));
+			int rowAffected = statement.executeUpdate(sql);
+			if (rowAffected == 1) {
+				contact = new Contact(employeeId, company_id, name, address, gender);
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+			try {
+				connection.rollback();
+			} catch (SQLException ex) {
+				ex.printStackTrace();
+			}
+			return contact;
+		}
+
+		try (Statement statement = connection.createStatement();) {
+			String sql = String.format("INSERT INTO employee_department (emp_id, dept_id) VALUES (%s,%s)", employeeId,
+					dept_id);
+			int rowAffected = statement.executeUpdate(sql);
+			if (rowAffected == 1) {
+				contact = new Contact(employeeId, company_id, name, address, gender);
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+			try {
+				connection.rollback();
+			} catch (SQLException ex) {
+				ex.printStackTrace();
+			}
+			return contact;
+		}
+
+		try {
+			connection.commit();
+		} catch (SQLException e) {
+			e.printStackTrace();
+		} finally {
+			if (connection != null) {
+				try {
+					connection.close();
+				} catch (SQLException e) {
+					e.printStackTrace();
+				}
+			}
+		}
+		return contact;
+
 	}
 }

@@ -35,14 +35,6 @@ public class Contact {
 		this.gender = gender;
 	}
 
-//	public Contact(int id, String name, String gender, double salary, LocalDate startDate,
-//			       String companyName, int companyId, String department[]) {
-//		this(id, name, gender, salary, startDate);
-//		this.companyName = companyName;
-//		this.companyId = companyId;
-//		this.department = department;
-//	}
-
 	public Contact(int id, int companyId, String name, String address, String gender, String companyName, int deptId,
 			String deptName, double salary, LocalDate startDate, String[] department) {
 		this(id, name, gender, salary, startDate);
@@ -52,6 +44,14 @@ public class Contact {
 		this.deptId = deptId;
 		this.deptName = deptName;
 		this.department = department;
+	}
+
+	public Contact(int employeeId, int company_id, String name, String address, String gender) {
+		this.id=employeeId;
+		this.companyId=company_id;
+		this.name=name;
+		this.address=address;
+		this.gender=gender;
 	}
 
 	// Override Equals method
