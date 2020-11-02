@@ -89,4 +89,10 @@ public class Emp_Payroll_JDBC_Main {
 			double salary, LocalDate startDate) throws CustomPayrollException {
 		employeePayrollList.add(normalisedDBServiceObj.addEmployeeToDB(company_id, name, address, gender, dept_id, salary, startDate));
 	}
+
+	public List<Contact> readPayrollDataForActiveEmployees(IOService ioService) throws CustomPayrollException {
+		if (ioService.equals(IOService.DB_IO))
+			this.employeePayrollList = normalisedDBServiceObj.getActiveEmployees();
+		return employeePayrollList;
+	}
 }

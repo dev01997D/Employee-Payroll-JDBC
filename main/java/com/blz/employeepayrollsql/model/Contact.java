@@ -16,6 +16,7 @@ public class Contact {
 	public String department[];
 	public int deptId;
 	public String deptName;
+	public String is_active;
 
 	// Constructor
 	public Contact(int id, double salary, String name) {
@@ -52,6 +53,11 @@ public class Contact {
 		this.name=name;
 		this.address=address;
 		this.gender=gender;
+	}
+
+	public Contact(int emp_id, int companyId, String name, String address, String gender, String is_active) {
+		this(emp_id, companyId, name, address, gender);
+		this.is_active=is_active;
 	}
 
 	// Override Equals method
@@ -100,7 +106,8 @@ public class Contact {
 	public String toString() {
 		return "Contact [id=" + id + ", salary=" + salary + ", name=" + name + ", address=" + address + ", startDate="
 				+ startDate + ", gender=" + gender + ", companyName=" + companyName + ", companyId=" + companyId
-				+ ", department=" + Arrays.toString(department) + ", deptId=" + deptId + ", deptName=" + deptName + "]";
+				+ ", department=" + Arrays.toString(department) + ", deptId=" + deptId + ", deptName=" + deptName
+				+ ", is_active=" + is_active + "]";
 	}
 	
 }

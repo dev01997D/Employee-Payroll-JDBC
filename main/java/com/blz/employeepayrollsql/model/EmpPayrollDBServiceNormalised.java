@@ -228,4 +228,42 @@ public class EmpPayrollDBServiceNormalised {
 		return contact;
 
 	}
+
+	public List<Contact> getActiveEmployees() throws CustomPayrollException {
+		String sql = String.format("select * from employee where is_active='%s';","yes");
+		return this.getEmployeePayrollDBUsingDBForActiveEmployee(sql);
+	}
+	
+	private List<Contact> getEmployeePayrollDataNormalisedActive(ResultSet resultSet) {
+		List<Contact> employeePayrollList = new ArrayList<>();
+		try {
+			while (resultSet.next()) {
+				int id = resultSet.getInt("emp_id");
+				int companyId = resultSet.getInt("company_id");
+				String name = resultSet.getString("Name");
+				String address=resultSet.getString("address");
+				String gender = resultSet.getString("gender");
+				String is_active=resultSet.getString("is_active");
+				employeePayrollList
+						.add(new Contact(id, companyId, name,  address, gender, is_active));
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		System.out.println(employeePayrollList);
+		return employeePayrollList;
+	}
+	
+	private List<Contact> getEmployeePayrollDBUsingDBForActiveEmployee(String sql) throws CustomPayrollException {
+		ResultSet resultSet;
+		List<Contact> employeePayrollList = null;
+		try (Connection connection = connectionObj.getConnection();) {
+			PreparedStatement prepareStatement = connection.prepareStatement(sql);
+			resultSet = prepareStatement.executeQuery(sql);
+			employeePayrollList = this.getEmployeePayrollDataNormalisedActive(resultSet);
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		return employeePayrollList;
+	}
 }
