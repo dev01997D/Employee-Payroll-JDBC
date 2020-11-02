@@ -31,7 +31,7 @@ public class Emp_Payroll_JDBC_Test {
 		List<Contact> empPayrollData;
 		try {
 			empPayrollData = empPayrollService.readEmployeePayrollDatabase(IOService.DB_IO);
-			Assert.assertEquals(5, empPayrollData.size());
+			Assert.assertEquals(6, empPayrollData.size());
 		} catch (CustomPayrollException e) {
 			e.printStackTrace();
 		}
@@ -57,7 +57,7 @@ public class Emp_Payroll_JDBC_Test {
 		List<Contact> empPayrollList = empPayrollService.readEmployeePayrollForGivenDateRange(IOService.DB_IO,
 				startDate, endDate);
 		System.out.println(empPayrollList);
-		Assert.assertEquals(1, empPayrollList.size());
+		Assert.assertEquals(2, empPayrollList.size());
 	}
 
 	@Test
@@ -66,14 +66,24 @@ public class Emp_Payroll_JDBC_Test {
 		empPayrollService.readEmployeePayrollDatabase(IOService.DB_IO);
 		Map<String, Double> averageSalaryByGender = empPayrollService.readAverageSalaryByGender(IOService.DB_IO);
 		Assert.assertTrue(
-				averageSalaryByGender.get("M").equals(1750000.00) && averageSalaryByGender.get("F").equals(3000000.00));
+				averageSalaryByGender.get("M").equals(2000000.00) && averageSalaryByGender.get("F").equals(3000000.00));
 	}
 
+//	@Test
+//	public void givenNewEmployee_whenAdded_shouldSyncWithDB() throws CustomPayrollException {
+//		empPayrollService.readEmployeePayrollDatabase(IOService.DB_IO);
+//		empPayrollService.addEmployeeToEmployeePayrollDB(2, "Mark", "HYD", "M", 53, 5000000.00, LocalDate.now());
+//		boolean result = empPayrollService.checkEmployeePayrollListSyncWithDB("Mark");
+//		Assert.assertTrue(result);
+//	}
+	
 	@Test
-	public void givenNewEmployee_whenAdded_shouldSyncWithDB() throws CustomPayrollException {
+	public void fromgivenEmployeePayrollDB_ShouldReturn_OnlyActiveEmployees() throws CustomPayrollException {
 		empPayrollService.readEmployeePayrollDatabase(IOService.DB_IO);
-		empPayrollService.addEmployeeToEmployeePayrollDB(2, "Mark", "HYD", "M", 53, 5000000.00, LocalDate.now());
-		boolean result = empPayrollService.checkEmployeePayrollListSyncWithDB("Mark");
-		Assert.assertTrue(result);
+		List<Contact> employeePayrollData =empPayrollService
+				.readPayrollDataForActiveEmployees(IOService.DB_IO);
+		//System.out.println(employeePayrollData);
+		Assert.assertEquals(3, employeePayrollData.size());
 	}
+
 }
